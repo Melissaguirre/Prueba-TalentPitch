@@ -27,10 +27,10 @@ def main():
         Exception: Propagates exceptions from data loading, processing, or database operations
     """
     logging.info("Starting data process")
-    data = load_data()
-    save_metrics_csv_pdf(data)
+    data_cleaned = load_data()
     init_db()
-    save_data(data)
+    save_data(data_cleaned)
+    save_metrics_csv_pdf(data_cleaned)
     logging.info("Data process completed")
 
 
