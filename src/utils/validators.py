@@ -87,9 +87,9 @@ def validation_valid_ids(df: pd.DataFrame, file_name: str) -> pd.DataFrame:
 
     df = df.sort_values(by="created_at")
     before_duplicates = df.shape[0]
-    df_depured = df.drop_duplicates(subset=["id"], keep="last")
+    df_depured = df.drop_duplicates(subset=["id"], keep="last").copy()
+    df_depured["id"] = df_depured["id"].astype(int)
     removed_duplicates = before_duplicates - df_depured.shape[0]
-
     if removed_duplicates > 0:
         logging.warning(
             f"{removed_duplicates} duplicate IDs removed in file {file_name}"
