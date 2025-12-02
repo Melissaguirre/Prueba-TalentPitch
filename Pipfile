@@ -11,6 +11,7 @@ openpyxl = "*"
 fpdf = "*"
 matplotlib = "*"
 sendgrid = "*"
+pydantic-settings = "*"
 
 [dev-packages]
 

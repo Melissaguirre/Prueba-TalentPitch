@@ -1,12 +1,13 @@
+import io
+import tempfile
 import pandas as pd
-
-from processing.metrics import get_all_metrics_as_dict
-
-from fpdf import FPDF
 import matplotlib.pyplot as plt
 from datetime import datetime
-import pandas as pd
-import tempfile
+from fpdf import FPDF
+
+from processing.metrics import get_all_metrics_as_dict
+from utils.sengrid import sendgrid_service
+from config import settings
 
 
 class PDFReport(FPDF):
@@ -76,7 +77,7 @@ def transform_metrics(dataframes: dict):
     return kpis
 
 
-def generate_report_pdf(dataframes: dict, filename="report.pdf", version="1.0"):
+def generate_report_pdf(dataframes: dict, version="1.0"):
     pdf = PDFReport()
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
@@ -156,11 +157,10 @@ def generate_report_pdf(dataframes: dict, filename="report.pdf", version="1.0"):
     pdf.add_paragraph(
         "3. Crear flows orientados a habilidades técnicas populares como programación, UX y data para atraer más participantes."
     )
+    return pdf.output(dest="S").encode("latin1")
 
-    pdf.output(filename)
 
-
-def create_csv_report(data: dict[str, pd.DataFrame], filename="metrics_report.csv"):
+def create_csv_report(data: dict[str, pd.DataFrame]):
     """
     Write multiple dataframes to a single CSV file with section headers.
 
@@ -171,11 +171,32 @@ def create_csv_report(data: dict[str, pd.DataFrame], filename="metrics_report.cs
         data: Dictionary mapping metric names to their DataFrames
         filename: Output CSV file path (default: "metrics_report.csv")
     """
-    with open("metrics_report.csv", "w", encoding="utf-8") as file:
-        for title, df_metric in data.items():
-            file.write(f" -- {title} --\n")
-            df_metric.to_csv(file, index=False)
-            file.write("\n\n")
+
+    buffer = io.StringIO()
+    for title, df_metric in data.items():
+        buffer.write(f" -- {title} --\n")
+        df_metric.to_csv(buffer, index=False)
+        buffer.write("\n\n")
+
+    return buffer.getvalue().encode("utf-8")
+
+
+def send_reports_email(csv_report: bytes, pdf_report: bytes):
+    dynamic_data = {"subject": "Reporte Métricas"}
+    attachments = [
+        {"filename": "metrics.csv", "content": csv_report, "type": "text/csv"},
+        {
+            "filename": "metrics_report.pdf",
+            "content": pdf_report,
+            "type": "application/pdf",
+        },
+    ]
+    return sendgrid_service.send_email(
+        receivers=settings.EMAIL_RECEIVER,
+        template_id=settings.TEMPLATE_ID,
+        dynamic_data=dynamic_data,
+        attachments=attachments,
+    )
 
 
 def save_metrics_csv_pdf(data: dict[str, pd.DataFrame]):
@@ -191,6 +212,6 @@ def save_metrics_csv_pdf(data: dict[str, pd.DataFrame]):
         data: Dictionary of validated DataFrames from the loading phase
     """
     metrics = get_all_metrics_as_dict(data)
-
-    create_csv_report(metrics, filename="metrics_report.csv")
-    generate_report_pdf(metrics, filename="metrics_report.pdf")
+    csv_bytes = create_csv_report(metrics)
+    pdf_bytes = generate_report_pdf(metrics)
+    send_reports_email(csv_bytes, pdf_bytes)
