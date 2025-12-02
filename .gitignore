@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+Pipfile.lock
+data_clean.db
+output/
+metrics_report.csv
+metrics_report.pdf
+
+.vscode/*
+.vscode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
