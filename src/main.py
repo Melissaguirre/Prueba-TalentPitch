@@ -3,13 +3,12 @@ import logging
 from ingestion.loader import load_data
 from db.database import init_db
 from db.save import save_data
-from reporting.resports import save_metrics_csv_pdf
+from reporting.reports import save_metrics_csv_pdf
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
 )
-
 
 def main():
     """
