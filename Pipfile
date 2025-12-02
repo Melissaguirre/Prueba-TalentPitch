@@ -12,6 +12,8 @@ fpdf = "*"
 matplotlib = "*"
 sendgrid = "*"
 pydantic-settings = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 
