@@ -241,4 +241,53 @@ Tras ejecutar `pipenv run python src/main.py` (o `python src/main.py` con venv),
 ```
 
 ## Testing
-[Cómo ejecutar los tests y qué cobertura tienen]
+
+### Instalación de pytest
+
+Pytest es la herramienta para ejecutar tests. Instálalo en tu entorno de desarrollo:
+
+```bash
+# Con pipenv (recomendado)
+pipenv install pytest pytest-cov --dev
+
+# Con pip + venv
+pip install pytest pytest-cov
+```
+
+### Estructura de Tests
+
+Los tests están organizados en `tests/`:
+
+```
+tests/               
+├── conftest.py                      # Configuración pytest (sys.path para imports)
+├── test_validators_simple.py        # test para funciones de validación
+└── test_metrics.py                  # tests para funciones de métricas
+```
+### Cómo Ejecutar los Tests
+
+**Ejecutar todos los tests:**
+```bash
+pytest tests/ -v
+```
+
+**Ejecutar solo validadores:**
+```bash
+pytest tests/test_validators_simple.py -v
+```
+
+**Ejecutar solo métricas:**
+```bash
+pytest tests/test_metrics.py -v
+```
+
+**Ejecutar un test específico:**
+```bash
+pytest tests/test_validators.py::test_validation_emails_uniques -v -s
+```
+
+**Ver cobertura (% de código cubierto):**
+```bash
+pytest tests/ --cov=src --cov-report=term-missing
+```
+
